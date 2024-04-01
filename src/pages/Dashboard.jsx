@@ -6,28 +6,40 @@ import { FaQuoteLeft } from "react-icons/fa";
 import Card from "../components/Card";
 import Result from "../components/Result";
 
-function explode() {
-  console.log("You Lose");
-}
-
-function winner() {
-  console.log("You Won");
-}
+import { useState } from "react";
 
 function Dashboard() {
+  const [status, setStatus] = useState();
+  const [showPopup, setShowPopup] = useState(false);
+
   var defuse = 0;
   var won = 5;
 
+  function explode() {
+    setStatus("Explode Card: You Lose");
+    setShowPopup(!showPopup);
+  }
+
+  function winner() {
+    setStatus("You Won");
+    setShowPopup(!showPopup);
+  }
+
+  function shuffle() {
+    setStatus("Shuffle");
+    setShowPopup(!showPopup);
+  }
+
   const selection = (text) => {
-    if (text == "explode") {
+    if (text == "💥") {
       if (defuse == 0) {
         explode();
       } else {
         defuse -= 1;
       }
-    } else if (text == "shuffle") {
-      window.location.reload();
-    } else if (text == "defuse") {
+    } else if (text == "🔄") {
+      shuffle();
+    } else if (text == "💣") {
       defuse += 1;
       console.log(defuse);
     } else {
@@ -72,6 +84,19 @@ function Dashboard() {
           </button>
         </div>
       </div>
+      {showPopup && (
+        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-gray-800 p-4 rounded-md">
+            <span>{status}</span>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-red-500 p-2 mt-2 rounded-md"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

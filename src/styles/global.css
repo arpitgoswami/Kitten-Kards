@@ -14,18 +14,6 @@ body {
   font-style: normal;
 }
 
-#glassmorphism {
-  background-color: rgba(255, 255, 255, 0.2); /* Adjust opacity as needed */
-  border: none;
-  padding: 40px;
-  font-size: 16px;
-  border-radius: 10px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
-  color: #fff; /* Text color */
-  transition: background-color 0.3s ease;
-}
-
 button {
   opacity: 40%;
   display: flex;
@@ -35,4 +23,18 @@ button {
 
 button:hover {
   opacity: 100%;
+}
+
+#emoji {
+  font-size: 4rem;
+  filter: drop-shadow(0.2rem 0.2rem 0.2rem #393e46);
+  display: none;
+  transition-duration: 0.5s;
+}
+
+#question {
+  font-size: 4rem;
+  filter: drop-shadow(0.2rem 0.2rem 0.2rem #393e46);
+  display: block;
+  transition-duration: 0.5s;
 }
