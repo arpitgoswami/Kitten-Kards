@@ -22,6 +22,19 @@ const Login = () => {
     }
   };
 
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post("http://localhost:3001/signup", {
+        username,
+        password,
+      });
+      setMessage(response.data);
+    } catch (error) {
+      setMessage(error.response.data);
+    }
+  };
+
   useEffect(() => {
     if (status == 202) {
       window.location.href = "./dashboard";
@@ -57,6 +70,13 @@ const Login = () => {
           >
             Login
           </button>
+          <button
+            className="mt-6 w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            onClick={handleSignUp}
+          >
+            Sign Up
+          </button>
+          <p className="mt-2 text-center text-sm text-gray-600">{message}</p>
         </form>
       </div>
     </div>

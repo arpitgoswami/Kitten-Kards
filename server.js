@@ -41,6 +41,18 @@ app.post("/login", async (req, res) => {
   }
 });
 
+app.post("/signup", async (req, res) => {
+  const { username, password } = req.body;
+  const exists = await client.exists(username);
+
+  if (exists != 1) {
+    await client.set(username, password);
+    res.status(200).send("User registered successfully.");
+  } else {
+    res.status(401).send("User already exists with same username.");
+  }
+});
+
 // Start the server
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
