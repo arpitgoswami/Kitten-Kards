@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 import { MdOutlineRestartAlt } from "react-icons/md";
 import { MdLeaderboard } from "react-icons/md";
 import { IoLogOutSharp } from "react-icons/io5";
@@ -25,10 +27,10 @@ function Dashboard() {
     setShowPopup(!showPopup);
   }
 
-  function shuffle() {
+  const shuffle = () => {
     setStatus("Shuffle");
     setShowPopup(!showPopup);
-  }
+  };
 
   const selection = (text) => {
     if (text == "💥") {
@@ -70,20 +72,30 @@ function Dashboard() {
             <MdOutlineRestartAlt />
             &nbsp; restart
           </button>
-          <button>
-            <MdLeaderboard />
-            &nbsp; leaderboard
-          </button>
-          <button>
-            <IoLogOutSharp />
-            &nbsp; logout
-          </button>
-          <button>
-            <FaQuoteLeft />
-            &nbsp; quote
-          </button>
+
+          <Link to="../leaders">
+            <button>
+              <MdLeaderboard />
+              &nbsp; leaderboard
+            </button>
+          </Link>
+
+          <Link to="../login">
+            <button>
+              <IoLogOutSharp />
+              &nbsp; logout
+            </button>
+          </Link>
+
+          <Link to="../rules">
+            <button>
+              <FaQuoteLeft />
+              &nbsp; rules
+            </button>
+          </Link>
         </div>
       </div>
+
       {showPopup && (
         <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-gray-800 p-4 rounded-md">

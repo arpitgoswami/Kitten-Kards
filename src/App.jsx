@@ -8,22 +8,16 @@ import Result from "./components/Result";
 
 import "./styles/global.css";
 
-function Navigation() {
-  return (
-    <div>
-      <Link to="/contact">Click me</Link> {/* Render link conditionally */}
-    </div>
-  );
-}
-
 function App() {
   return (
     <>
       <Router>
         <Routes>
-          <Route path="*" element={<Navigation />} />{" "}
+          <Route path="*" element={<Login />} />
           {/* Render Navigation on all routes */}
-          <Route path="/contact" element={<Login />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/leaders" element={<Leaders />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </Router>
     </>
