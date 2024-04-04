@@ -1,12 +1,24 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 function Leaders() {
-  const leaders = [
-    { username: "user1", wins: 10 },
-    { username: "user2", wins: 20 },
-    { username: "user3", wins: 30 },
-    { username: "user4", wins: 40 },
-  ];
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/redis");
+        setData(response.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  data.sort((a, b) => {
+    return b.value - a.value;
+  });
 
   return (
     <div className="w-[100wh] h-[100vh] bg-[#222831] flex justify-center items-center">
@@ -15,15 +27,17 @@ function Leaders() {
         <table className="w-full text-[#EEEEEE]">
           <thead>
             <tr>
-              <th className="text-left py-2 font-normal">Username</th>
+              <th className="text-left py-2 font-normal">Leaders</th>
               <th className="text-right py-2 font-normal">Wins</th>
             </tr>
           </thead>
           <tbody>
-            {leaders.map((leader) => (
-              <tr key={leader.username}>
-                <td className="text-left py-2">{leader.username}</td>
-                <td className="text-right py-2">{leader.wins}</td>
+            {data.map((item, index) => (
+              <tr key={index}>
+                <td className="text-left py-2">
+                  {item.key.replace("leader", "")}
+                </td>
+                <td className="text-right py-2">{item.value}</td>
               </tr>
             ))}
           </tbody>

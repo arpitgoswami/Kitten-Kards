@@ -6,9 +6,10 @@ import { IoLogOutSharp } from "react-icons/io5";
 import { FaQuoteLeft } from "react-icons/fa";
 
 import Card from "../components/Card";
-import Result from "../components/Result";
 
 import { useState } from "react";
+
+import axios from "axios";
 
 function Dashboard() {
   const [status, setStatus] = useState();
@@ -17,13 +18,30 @@ function Dashboard() {
   var defuse = 0;
   var won = 5;
 
+  const logout = async (e) => {
+    e.preventDefault();
+    axios
+      .get("http://localhost:3001/logout")
+      .then((res) => {
+        console.log(res.data);
+      })
+      .catch((err) => console.log(err));
+    window.location.href = "leaders";
+  };
+
   function explode() {
     setStatus("Explode Card: You Lose");
     setShowPopup(!showPopup);
   }
 
   function winner() {
-    setStatus("You Won");
+    axios
+      .get("http://localhost:3001/won")
+      .then((res) => {
+        none;
+      })
+      .catch((err) => console.log(err));
+    setStatus("You won the game.");
     setShowPopup(!showPopup);
   }
 
@@ -93,6 +111,16 @@ function Dashboard() {
               &nbsp; rules
             </button>
           </Link>
+
+          <button onClick={winner}>
+            <FaQuoteLeft />
+            &nbsp; Win Conditin
+          </button>
+
+          <button onClick={logout}>
+            <IoLogOutSharp />
+            &nbsp; logout
+          </button>
         </div>
       </div>
 
@@ -104,7 +132,7 @@ function Dashboard() {
               onClick={() => window.location.reload()}
               className="bg-red-500 p-2 mt-2 rounded-md"
             >
-              Close
+              Okay
             </button>
           </div>
         </div>

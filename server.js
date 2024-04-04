@@ -4,6 +4,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import redis from "redis";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 const app = express();
 const client = redis.createClient({
@@ -28,13 +29,16 @@ client.on("error", (error) => {
 
 app.use(cors()); // Add this line to enable CORS
 app.use(bodyParser.json());
+app.use(cookieParser());
 
-// Login endpoint
+app.set("trust proxy", 1);
+
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
-  const storedPassword = await client.get(username); // Await the client.get() call
+  const storedPassword = await client.get(username);
   if (storedPassword == password) {
+    await client.set("current", username);
     res.status(202).send("Login was successful.");
   } else {
     res.status(401).send("Incorrect username or password.");
@@ -53,8 +57,61 @@ app.post("/signup", async (req, res) => {
   }
 });
 
+app.get("/logout", async (req, res) => {
+  await client.del("current");
+  res.send("Completed");
+});
+
+// Route to get session data
+app.get("/getSession", async (req, res) => {
+  const username = await client.get("current");
+  const ip = req.ip;
+  res.send(username + ip);
+});
+
+app.get("/won", async (req, res) => {
+  const username = await client.get("current");
+  const a = await client.exists("leader" + username);
+  if (!a) {
+    await client.set("leader" + username, 1);
+  } else {
+    await client.incr("leader" + username);
+  }
+  res.status(200);
+});
+
+async function getAllRedisKeysAndValues() {
+  try {
+    const keys = await client.keys("*");
+
+    const promises = keys.map(async function (key) {
+      if (key.includes("leader")) {
+        const value = await client.get(key);
+        return { key, value };
+      }
+    });
+
+    const results = await Promise.all(promises);
+    const filteredResults = results.filter((result) => result !== undefined);
+
+    // Now you have all the key-value pairs where key includes "leader"
+    return filteredResults;
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
+app.get("/redis", async (req, res) => {
+  try {
+    const data = await getAllRedisKeysAndValues();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 // Start the server
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Server iss running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
