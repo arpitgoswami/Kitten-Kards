@@ -37,16 +37,6 @@ const Login = () => {
       }
    }
 
-   const checkSession = async (e) => {
-      e.preventDefault()
-      axios
-         .get('http://localhost:3001/getSession')
-         .then((res) => {
-            setMessage(res.data)
-         })
-         .catch((err) => console.log(err))
-   }
-
    useEffect(() => {
       if (status == 202) {
          window.location.href = './dashboard'
@@ -69,6 +59,7 @@ const Login = () => {
                   placeholder="Username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  required
                />
                <input
                   type="password"
@@ -76,6 +67,7 @@ const Login = () => {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  required
                />
                <button
                   type="submit"
@@ -88,12 +80,6 @@ const Login = () => {
                   onClick={handleSignUp}
                >
                   Sign Up
-               </button>
-               <button
-                  className="w-full justify-center rounded-sm bg-[var(--grey)] py-2 text-base opacity-80 hover:opacity-100"
-                  onClick={checkSession}
-               >
-                  Check Session
                </button>
                <p className="mt-4 text-center text-sm text-[var(--white)]">
                   {message}

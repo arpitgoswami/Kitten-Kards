@@ -25,7 +25,7 @@ function Card({ onClick }) {
       <div
          ref={cardRef}
          onClick={handleClick}
-         className="mb-4 w-[12rem] cursor-pointer rounded-md bg-[#393E46] py-24 text-center font-normal text-[#222831] opacity-100 duration-500 hover:opacity-70"
+         className="mb-4 w-[12rem] cursor-pointer rounded-md bg-[var(--grey)] py-24 text-center font-normal text-[var(--dark)] opacity-100 duration-500 hover:opacity-70"
       >
          <div id="emoji" ref={emojiRef}>
             {cardsEmoji[Math.floor(Math.random() * cards.length)]}
