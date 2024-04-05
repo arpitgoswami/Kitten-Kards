@@ -1,6 +1,6 @@
 module myproject
 
-go 1.22.1
+go 1.23
 
 require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
