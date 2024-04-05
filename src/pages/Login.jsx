@@ -13,10 +13,13 @@ const Login = () => {
    const handleLogin = async (e) => {
       e.preventDefault()
       try {
-         const response = await axios.post('http://localhost:3001/login', {
-            username,
-            password,
-         })
+         const response = await axios.post(
+            'https://kitten-kards-backend.onrender.com/login',
+            {
+               username,
+               password,
+            }
+         )
          setMessage(response.data)
          setStatus(response.status)
       } catch (error) {
@@ -27,10 +30,13 @@ const Login = () => {
    const handleSignUp = async (e) => {
       e.preventDefault()
       try {
-         const response = await axios.post('http://localhost:3001/signup', {
-            username,
-            password,
-         })
+         const response = await axios.post(
+            'https://kitten-kards-backend.onrender.com/signup',
+            {
+               username,
+               password,
+            }
+         )
          setMessage(response.data)
       } catch (error) {
          setMessage(error.response.data)

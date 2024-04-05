@@ -21,7 +21,7 @@ function Dashboard() {
    useState(() => {
       var cond
       axios
-         .get('http://localhost:3001/getSession')
+         .get('https://kitten-kards-backend.onrender.com/getSession')
          .then((res) => {
             cond = res.data
          })
@@ -37,7 +37,7 @@ function Dashboard() {
    const logout = async (e) => {
       e.preventDefault()
       axios
-         .get('http://localhost:3001/logout')
+         .get('https://kitten-kards-backend.onrender.com/logout')
          .then((res) => {
             console.log(res.data)
          })
@@ -52,7 +52,7 @@ function Dashboard() {
 
    function winner() {
       axios
-         .get('http://localhost:3001/won')
+         .get('https://kitten-kards-backend.onrender.com/won')
          .then((res) => {
             none
          })
@@ -128,11 +128,6 @@ function Dashboard() {
                      &nbsp; rules
                   </button>
                </Link>
-
-               <button onClick={winner}>
-                  <FaQuoteLeft />
-                  &nbsp; Win Conditin
-               </button>
             </div>
          </div>
 
