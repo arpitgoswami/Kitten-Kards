@@ -82,7 +82,7 @@ function Dashboard() {
          console.log(text)
       }
 
-      won === 1 ? winner() : () => dispatch({ type: 'DECREMENT' })
+      won === 1 ? winner() : dispatch({ type: 'DECREMENT' })
    }
 
    return (
