@@ -2,62 +2,217 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
-var redisClient *redis.Client
+var ctx = context.Background()
+var client *redis.Client
 
-func init() {
-	redisClient = redis.NewClient(&redis.Options{
+func main() {
+	// Initialize Redis client
+	client = redis.NewClient(&redis.Options{
 		Addr:     "redis-14279.c305.ap-south-1-1.ec2.cloud.redislabs.com:14279",
 		Password: "xVrg8gJBE2v7aHFfpenfVsasRLUUxoRK",
-		DB:       0,
 	})
 
-	// Check if Redis connection is successful
-	pong, err := redisClient.Ping(context.Background()).Result()
+	// Ping the Redis server
+	_, err := client.Ping(ctx).Result()
 	if err != nil {
-		panic(fmt.Sprintf("Failed to connect to Redis: %v", err))
+		log.Fatalf("Could not connect to Redis: %v", err)
 	}
-	fmt.Println("Connected to Redis:", pong)
+	fmt.Println("Connected to Redis server successfully!")
+
+	// Initialize the router
+	router := mux.NewRouter()
+
+	// Routes
+	router.HandleFunc("/login", loginHandler).Methods("POST")
+	router.HandleFunc("/signup", signupHandler).Methods("POST")
+	router.HandleFunc("/logout", logoutHandler).Methods("GET")
+	router.HandleFunc("/getSession", getSessionHandler).Methods("GET")
+	router.HandleFunc("/won", wonHandler).Methods("GET")
+	router.HandleFunc("/redis", redisHandler).Methods("GET")
+
+	// CORS middleware
+	corsHandler := cors.Default().Handler(router)
+
+	// Start the server
+	port := ":3001"
+	fmt.Printf("Server is running on port %s\n", port)
+	log.Fatal(http.ListenAndServe(port, corsHandler))
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	// Your login handling code here
+	// Parse request body
+	var credentials map[string]string
+	err := json.NewDecoder(r.Body).Decode(&credentials)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	username, ok := credentials["username"]
+	if !ok {
+		http.Error(w, "Username is required", http.StatusBadRequest)
+		return
+	}
+
+	password, ok := credentials["password"]
+	if !ok {
+		http.Error(w, "Password is required", http.StatusBadRequest)
+		return
+	}
+
+	// Fetch stored password from Redis
+	storedPassword, err := client.Get(ctx, username).Result()
+	if err != nil {
+		http.Error(w, "Incorrect username or password.", http.StatusUnauthorized)
+		return
+	}
+
+	// Compare passwords
+	if storedPassword == password {
+		// Set current user in Redis
+		err := client.Set(ctx, "current", username, 0).Err()
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusAccepted)
+		w.Write([]byte("Login was successful."))
+	} else {
+		http.Error(w, "Incorrect username or password.", http.StatusUnauthorized)
+	}
 }
 
 func signupHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	// Your signup handling code here
+	// Parse request body
+	var credentials map[string]string
+	err := json.NewDecoder(r.Body).Decode(&credentials)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	username, ok := credentials["username"]
+	if !ok {
+		http.Error(w, "Username is required", http.StatusBadRequest)
+		return
+	}
+
+	password, ok := credentials["password"]
+	if !ok {
+		http.Error(w, "Password is required", http.StatusBadRequest)
+		return
+	}
+
+	// Check if user already exists
+	exists, err := client.Exists(ctx, username).Result()
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	if exists == 1 {
+		http.Error(w, "User already exists with the same username.", http.StatusUnauthorized)
+		return
+	}
+
+	// Register new user
+	err = client.Set(ctx, username, password, 0).Err()
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("User registered successfully."))
 }
 
-func main() {
-	router := mux.NewRouter()
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+	// Delete current user from Redis
+	err := client.Del(ctx, "current").Err()
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 
-	// CORS middleware
-	router.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-			w.Header().Set("Access-Control-Allow-Credentials", "true")
-			if r.Method == "OPTIONS" {
-				w.WriteHeader(http.StatusOK)
-				return
-			}
-			next.ServeHTTP(w, r)
+	w.Write([]byte("Completed"))
+}
+
+func getSessionHandler(w http.ResponseWriter, r *http.Request) {
+	// Get current user from Redis
+	username, err := client.Get(ctx, "current").Result()
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	// Get IP address
+	ip := strings.Split(r.RemoteAddr, ":")[0]
+
+	sessionData := username + " " + ip
+	w.Write([]byte(sessionData))
+}
+
+func wonHandler(w http.ResponseWriter, r *http.Request) {
+	// Get current user from Redis
+	username, err := client.Get(ctx, "current").Result()
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	// Increment wins count for the user
+	key := "leader" + username
+	_, err = client.Incr(ctx, key).Result()
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func redisHandler(w http.ResponseWriter, r *http.Request) {
+	// Get all keys with "leader" prefix
+	keys, err := client.Keys(ctx, "leader*").Result()
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	// Get values for each key
+	var data []map[string]string
+	for _, key := range keys {
+		value, err := client.Get(ctx, key).Result()
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		data = append(data, map[string]string{
+			"key":   key,
+			"value": value,
 		})
-	})
+	}
 
-	router.HandleFunc("/login", loginHandler).Methods(http.MethodPost)
-	router.HandleFunc("/signup", signupHandler).Methods(http.MethodPost)
+	// Convert data to JSON and send response
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 
-	fmt.Println("Server on :8080")
-	log.Fatal(http.ListenAndServe(":8080", router))
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonData)
 }
