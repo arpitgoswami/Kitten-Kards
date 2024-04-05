@@ -14,7 +14,7 @@ function App() {
       <>
          <Router>
             <Routes>
-               <Route path="*" element={<Login />} />
+               <Route path="*" element={<Dashboard />} />
                {/* Render Navigation on all routes */}
                <Route path="/dashboard" element={<Dashboard />} />
                <Route path="/leaders" element={<Leaders />} />
