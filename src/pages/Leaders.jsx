@@ -1,36 +1,52 @@
-import React from "react";
+import React, { useEffect, useState } from 'react'
+import axios from 'axios'
 
 function Leaders() {
-  const leaders = [
-    { username: "user1", wins: 10 },
-    { username: "user2", wins: 20 },
-    { username: "user3", wins: 30 },
-    { username: "user4", wins: 40 },
-  ];
+   const [data, setData] = useState([])
 
-  return (
-    <div className="w-[100wh] h-[100vh] bg-[#222831] flex justify-center items-center">
-      <div className="bg-[#393E46] rounded-md shadow-xl p-4 m-8 w-[100vh] h-[80vh]">
-        <h2 className="text-2xl text-[#EEEEEE] mb-2">Leader Board</h2>
-        <table className="w-full text-[#EEEEEE]">
-          <thead>
-            <tr>
-              <th className="text-left py-2 font-normal">Username</th>
-              <th className="text-right py-2 font-normal">Wins</th>
-            </tr>
-          </thead>
-          <tbody>
-            {leaders.map((leader) => (
-              <tr key={leader.username}>
-                <td className="text-left py-2">{leader.username}</td>
-                <td className="text-right py-2">{leader.wins}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+   useEffect(() => {
+      const fetchData = async () => {
+         try {
+            const response = await axios.get('http://localhost:3001/redis')
+            setData(response.data)
+         } catch (error) {
+            console.error('Error fetching data:', error)
+         }
+      }
+      fetchData()
+   }, [])
+
+   data.sort((a, b) => {
+      return b.value - a.value
+   })
+
+   return (
+      <div className="flex h-[100vh] w-[100wh] items-center justify-center bg-[var(--dark)]">
+         <div className="m-8 h-[80vh] w-[100vh] rounded-md bg-[var(--grey)] p-4 shadow-xl">
+            <h2 className="mb-2 text-2xl text-[var(--white)]">
+               👑 Leader Board
+            </h2>
+            <table className="w-full text-[var(--white)]">
+               <thead className="text-[var(--blue)]">
+                  <tr>
+                     <th className="py-2 text-left font-normal">Leaders</th>
+                     <th className="py-2 text-right font-normal">Wins</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  {data.map((item, index) => (
+                     <tr key={index}>
+                        <td className="py-2 text-left">
+                           {index + 1 + ' - ' + item.key.replace('leader', '')}
+                        </td>
+                        <td className="py-2 text-right">{item.value}</td>
+                     </tr>
+                  ))}
+               </tbody>
+            </table>
+         </div>
       </div>
-    </div>
-  );
+   )
 }
 
-export default Leaders;
+export default Leaders
