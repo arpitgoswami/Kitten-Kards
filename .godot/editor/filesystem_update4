@@ -1,0 +1,12 @@
+res://Scenes/game.tscn
+res://Scenes/player.tscn
+res://Scripts/game_controller.gd
+res://Scenes/pineapple.tscn
+res://Scripts/pineapple.gd
+res://Scripts/apple.gd
+res://Scenes/apple.tscn
+res://Scripts/player.gd
+res://default_bus_layout.tres
+res://Scenes/background.tscn
+res://Scripts/menu.gd
+res://Scenes/menu.tscn
